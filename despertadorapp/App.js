@@ -9,10 +9,11 @@
 import React, {Component} from 'react';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createAppContainer } from 'react-navigation';
+import { createDrawerNavigator } from 'react-navigation-drawer';
 import MensagemComponente from './src/MensagemComponente';
 import ConfiguracaoComponente from './src/ConfiguracaoComponente';
 
-const AppNavigator = createStackNavigator({
+const AppNavigator = createDrawerNavigator({
   MensagemComponente: {
     screen: MensagemComponente
   },

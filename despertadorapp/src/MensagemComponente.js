@@ -7,6 +7,7 @@
 
 import React, { Component } from 'react';
 import Mensagem from './Mensagem';
+import Util from './Util';
 import {
     SafeAreaView,
     StyleSheet,
@@ -21,45 +22,85 @@ import {
     Button
 } from 'react-native';
 
+
 export default class MensagemComponente extends Component {
 
+    static navigationOptions = {
+        title: 'Mensagens'
+    }
     constructor(props) {
         super(props);
         this.state = {textoMensagem: ''};
-        this.exibirMensagem = this.exibirMensagem.bind(this);
-        this.tratarExibirMensagem = this.tratarExibirMensagem.bind(this);
+        this.buscarMensagens = this.buscarMensagens.bind(this);
+        this.tratarBuscarMensagens = this.tratarBuscarMensagens.bind(this);
+        this.exibirProximaMensagem = this.exibirProximaMensagem.bind(this);
         objMensagem = new Mensagem();
+        objUtil = new Util();
     }
 
     render() {
         return (
             <View style={styles.areaTotal}>
+                
                 <View style={styles.areaMenu}>
-                    <Text>MENU</Text>
+                    <Button onPress={() => {this.props.navigation.navigate('ConfiguracaoComponente')}} title="Configurações"></Button>
                 </View>
                 <View style={styles.areaMensagem}>
                     <Text>{this.state.textoMensagem}</Text>
-                </View>
+                </View>                
                 <View style={styles.areaBotao}>
-                    <Button onPress={this.exibirMensagem} title="OK"></Button>
+                    <Button onPress={this.buscarMensagens} title="Buscar mensagens"></Button>
+                </View>                
+                <View style={styles.areaBotao}>
+                    <Button onPress={this.exibirProximaMensagem} title=">>"></Button>
                 </View>
             </View>
         );
     }
-    exibirMensagem() {
-        objMensagem.sortearMensagem(this.tratarExibirMensagem);
-    }
-    
-    tratarExibirMensagem(oJsonMensagem) {
-        if(oJsonMensagem && oJsonMensagem.length > 0) {
+    // Busca na base de dados as mensagens cadastradas e salva no dispositivo.
+    buscarMensagens() {
         
-        let estado = this.state;
+        objMensagem.listar(this.tratarBuscarMensagens);
+    }
 
-        estado.textoMensagem = oJsonMensagem[0].texto;
-        this.setState(estado);
+    tratarBuscarMensagens(oJsonMensagens) {
+        if(oJsonMensagens && oJsonMensagens.length > 0) {
+            Alert.alert(oJsonMensagens.length + ' mensagens salvas no dispositivo.');
+
+            this.listaMensagens = oJsonMensagens;
+            
         } else {
             Alert.alert('Cadastrado não localizado.');
         }
+    }
+
+    // Faz o sorteio da mensagem a partir da lista salva no dispositivo.
+    exibirProximaMensagem() {
+        
+        let estado = this.state;
+        let listaMensagens = this.listaMensagens;
+        let listaMensagensExibidas = [];
+
+        // Este if ainda nao esta pronto. Comecamos a mexer em 03/10.
+        if (listaMensagens.length > 0){
+            let indiceMensagem = 0;
+
+            if(listaMensagens.length > 1) {
+                indiceMensagem = objUtil.getRand(listaMensagens.length);
+            }
+            let oMensagem = listaMensagens[indiceMensagem];
+            
+            if (!oMensagem.indicadorExibida) {
+                estado.textoMensagem = oMensagem.texto;
+                this.setState(estado);
+                oMensagem.indicadorExibida = true;
+                listaMensagensExibidas.push(oMensagem);
+                listaMensagens.splice(indiceMensagem);
+            }
+        } else {
+            Alert.alert('Voce nao tem novas mensagens. :(');
+        }
+
     }
 }
 

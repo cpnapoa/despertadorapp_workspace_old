@@ -6,8 +6,14 @@ export default class Util {
 
         if (__DEV__) {
             protocol = 'http://';
-            domain = '192.168.1.118:8000';
+            domain = '192.168.2.131:8000';
         }
         return protocol + domain + metodo;
+    }
+
+
+    getRand(numMax){
+        numRand = Math.floor((Math.random() * numMax));
+        return numRand;
     }
 }

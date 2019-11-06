@@ -17,6 +17,10 @@ import {
 
 export default class ConfiguracaoComponente extends Component {
 
+    static navigationOptions = {
+        title: 'Configurações'
+    }
+
     constructor(props) {
         super(props);
         this.state = {};

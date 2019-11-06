@@ -27,9 +27,9 @@ export default class Mensagem {
         objUtil = new Util();
     }
 
-    sortearMensagem(funcaoTratamentoRetono) {
-        this.listar(funcaoTratamentoRetono);
-    }
+    // sortearMensagem(funcaoTratamentoRetono) {
+    //     this.listar(funcaoTratamentoRetono);
+    // }
 
     sincronizarMensagensComServidor() {
         let oJsonLista = this.listar();
