@@ -90,13 +90,12 @@ export default class MensagemComponente extends Component {
             }
             let oMensagem = listaMensagens[indiceMensagem];
             
-            if (!oMensagem.indicadorExibida) {
-                estado.textoMensagem = oMensagem.texto;
-                this.setState(estado);
-                oMensagem.indicadorExibida = true;
-                listaMensagensExibidas.push(oMensagem);
-                listaMensagens.splice(indiceMensagem);
-            }
+            estado.textoMensagem = oMensagem.texto;
+            this.setState(estado);
+            oMensagem.indicadorExibida = true;
+            listaMensagensExibidas.push(oMensagem);
+            listaMensagens.splice(indiceMensagem, 1);
+                
         } else {
             Alert.alert('Voce nao tem novas mensagens. :(');
         }

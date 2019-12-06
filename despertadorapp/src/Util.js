@@ -6,7 +6,8 @@ export default class Util {
 
         if (__DEV__) {
             protocol = 'http://';
-            domain = '192.168.2.131:8000';
+            //domain = '192.168.2.151:8000';
+            domain = '192.168.2.163:8000';
         }
         return protocol + domain + metodo;
     }
