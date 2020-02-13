@@ -21,7 +21,7 @@ import {
     TextInput,
     Button
 } from 'react-native';
-
+import { PushNotification } from 'react-native-push-notification';
 
 export default class MensagemComponente extends Component {
 
@@ -36,6 +36,12 @@ export default class MensagemComponente extends Component {
         this.exibirProximaMensagem = this.exibirProximaMensagem.bind(this);
         objMensagem = new Mensagem();
         objUtil = new Util();
+        var PushNotification = require("react-native-push-notification");
+        PushNotification.localNotificationSchedule({
+            //... You can use all the options from localNotifications
+            message: "Notificado!!!", // (required)
+            date: new Date(Date.now() + 5000) // in 60 secs
+          });
     }
 
     render() {
