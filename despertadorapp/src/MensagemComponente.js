@@ -21,8 +21,15 @@ import {
     TextInput,
     Button
 } from 'react-native';
-import { PushNotification } from 'react-native-push-notification';
 
+// import {Icon} from 'react-native-elements';
+// import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/FontAwesome';
+// import { PushNotification } from 'react-native-push-notification';
+
+// const icone = (<Icon name="rocket" size={30} color="#900" />);
+
+//<Icon name='sc-telegram' type='evilicon' color='#517fa4' />;
 export default class MensagemComponente extends Component {
 
     static navigationOptions = {
@@ -30,18 +37,19 @@ export default class MensagemComponente extends Component {
     }
     constructor(props) {
         super(props);
+        
         this.state = {textoMensagem: ''};
         this.buscarMensagens = this.buscarMensagens.bind(this);
         this.tratarBuscarMensagens = this.tratarBuscarMensagens.bind(this);
         this.exibirProximaMensagem = this.exibirProximaMensagem.bind(this);
         objMensagem = new Mensagem();
         objUtil = new Util();
-        var PushNotification = require("react-native-push-notification");
-        PushNotification.localNotificationSchedule({
-            //... You can use all the options from localNotifications
-            message: "Notificado!!!", // (required)
-            date: new Date(Date.now() + 5000) // in 60 secs
-          });
+        // var PushNotification = require("react-native-push-notification");
+        // PushNotification.localNotificationSchedule({
+        //     //... You can use all the options from localNotifications
+        //     message: "Notificado!!!", // (required)
+        //     date: new Date(Date.now() + 5000) // in 5 secs
+        //   });
     }
 
     render() {
@@ -49,7 +57,10 @@ export default class MensagemComponente extends Component {
             <View style={styles.areaTotal}>
                 
                 <View style={styles.areaMenu}>
-                    <Button onPress={() => {this.props.navigation.navigate('ConfiguracaoComponente')}} title="Configurações"></Button>
+                    <View style={{ flex:1, flexDirection:'row', justifyContent:'space-between', margin: 10}}>
+                        <Icon name="caret-left" size={30} color="#4F8EF7" />
+                        <Icon name="bars" size={30} color="#4F8EF7" />
+                    </View>
                 </View>
                 <View style={styles.areaMensagem}>
                     <Text>{this.state.textoMensagem}</Text>
@@ -122,7 +133,11 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch'
     },
     areaMenu: {
-        flex: 1
+        flex: 1,
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        backgroundColor: '#f5a5a5',
+        width: '100%'
     },
     areaBotao: {
         flex: 1
