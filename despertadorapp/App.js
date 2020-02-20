@@ -21,7 +21,9 @@ const AppNavigator = createDrawerNavigator({
     screen: ConfiguracaoComponente
   }
 },
-{});
+{
+  initialRouteName: 'MensagemComponente'
+});
 
 export default createAppContainer(AppNavigator);
 // import MensagemComponente from './src/MensagemComponente';

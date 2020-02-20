@@ -9,31 +9,20 @@ import React, { Component } from 'react';
 import Mensagem from './Mensagem';
 import Util from './Util';
 import {
-    SafeAreaView,
     StyleSheet,
-    ScrollView,
     Alert,
     View,
-    Image,
     Text,
-    Console,
-    StatusBar,
-    TextInput,
+    AsyncStorage,
     Button
 } from 'react-native';
 
-// import {Icon} from 'react-native-elements';
-// import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon from 'react-native-vector-icons/FontAwesome';
-// import { PushNotification } from 'react-native-push-notification';
 
-// const icone = (<Icon name="rocket" size={30} color="#900" />);
-
-//<Icon name='sc-telegram' type='evilicon' color='#517fa4' />;
 export default class MensagemComponente extends Component {
 
     static navigationOptions = {
-        title: 'Mensagens'
+        title: 'MensagemComponente'
     }
     constructor(props) {
         super(props);
@@ -42,6 +31,11 @@ export default class MensagemComponente extends Component {
         this.buscarMensagens = this.buscarMensagens.bind(this);
         this.tratarBuscarMensagens = this.tratarBuscarMensagens.bind(this);
         this.exibirProximaMensagem = this.exibirProximaMensagem.bind(this);
+        this.persistirMensagens = this.persistirMensagens.bind(this);
+        this.lerMensagensExibir = this.lerMensagensExibir.bind(this);
+        this.lerMensagensExibidas = this.lerMensagensExibidas.bind(this);
+        this.abrirConfiguracoes = this.abrirConfiguracoes.bind(this);
+        
         objMensagem = new Mensagem();
         objUtil = new Util();
         // var PushNotification = require("react-native-push-notification");
@@ -50,23 +44,22 @@ export default class MensagemComponente extends Component {
         //     message: "Notificado!!!", // (required)
         //     date: new Date(Date.now() + 5000) // in 5 secs
         //   });
-    }
 
+        this.buscarMensagens();
+    }
+    
     render() {
         return (
             <View style={styles.areaTotal}>
                 
                 <View style={styles.areaMenu}>
                     <View style={{ flex:1, flexDirection:'row', justifyContent:'space-between', margin: 10}}>
-                        <Icon name="caret-left" size={30} color="#4F8EF7" />
-                        <Icon name="bars" size={30} color="#4F8EF7" />
+                        <Icon name="caret-left" size={30} color="#022C18" />
+                        <Icon name="bars" size={30} color="#022C18" onPress={this.abrirConfiguracoes}  />
                     </View>
                 </View>
                 <View style={styles.areaMensagem}>
                     <Text>{this.state.textoMensagem}</Text>
-                </View>                
-                <View style={styles.areaBotao}>
-                    <Button onPress={this.buscarMensagens} title="Buscar mensagens"></Button>
                 </View>                
                 <View style={styles.areaBotao}>
                     <Button onPress={this.exibirProximaMensagem} title=">>"></Button>
@@ -75,48 +68,96 @@ export default class MensagemComponente extends Component {
         );
     }
     // Busca na base de dados as mensagens cadastradas e salva no dispositivo.
-    buscarMensagens() {
+    async buscarMensagens() {
+        let listaMensagensExibir = await this.lerMensagensExibir();
         
-        objMensagem.listar(this.tratarBuscarMensagens);
+        if(listaMensagensExibir instanceof Array && listaMensagensExibir.length <= 0) { 
+            objMensagem.listar(this.tratarBuscarMensagens);
+        }
     }
 
     tratarBuscarMensagens(oJsonMensagens) {
         if(oJsonMensagens && oJsonMensagens.length > 0) {
-            Alert.alert(oJsonMensagens.length + ' mensagens salvas no dispositivo.');
-
-            this.listaMensagens = oJsonMensagens;
             
+            this.persistirMensagens(oJsonMensagens, []);
+
+            Alert.alert(oJsonMensagens.length + ' mensagens sincronizadas no seu dispositivo.');
         } else {
-            Alert.alert('Cadastrado não localizado.');
+            Alert.alert('Cadastrado de mensagens não localizado.');
         }
     }
 
     // Faz o sorteio da mensagem a partir da lista salva no dispositivo.
-    exibirProximaMensagem() {
+    async exibirProximaMensagem() {
         
         let estado = this.state;
-        let listaMensagens = this.listaMensagens;
-        let listaMensagensExibidas = [];
+        let listaMensagensExibir = await this.lerMensagensExibir();
+        let listaMensagensExibidas = await this.lerMensagensExibidas();
 
         // Este if ainda nao esta pronto. Comecamos a mexer em 03/10.
-        if (listaMensagens.length > 0){
+        if (listaMensagensExibir.length > 0){
             let indiceMensagem = 0;
 
-            if(listaMensagens.length > 1) {
-                indiceMensagem = objUtil.getRand(listaMensagens.length);
+            if(listaMensagensExibir.length > 1) {
+                indiceMensagem = objUtil.getRand(listaMensagensExibir.length);
             }
-            let oMensagem = listaMensagens[indiceMensagem];
+            let oMensagem = listaMensagensExibir[indiceMensagem];
             
             estado.textoMensagem = oMensagem.texto;
             this.setState(estado);
             oMensagem.indicadorExibida = true;
             listaMensagensExibidas.push(oMensagem);
-            listaMensagens.splice(indiceMensagem, 1);
-                
-        } else {
-            Alert.alert('Voce nao tem novas mensagens. :(');
-        }
+            listaMensagensExibir.splice(indiceMensagem, 1);
 
+            this.persistirMensagens(listaMensagensExibir, listaMensagensExibidas);
+        } else {
+            Alert.alert('Você não tem novas mensagens. :(');
+        }
+    }
+
+    // create a function that saves your data asyncronously
+    async persistirMensagens (listaMensagensExibir, listaMensagensExibidas) {
+        try {                   
+            let promiseItensExibir = AsyncStorage.setItem('msgExibir', JSON.stringify(listaMensagensExibir));
+            let promiseItensExibidos = AsyncStorage.setItem('msgExibidas', JSON.stringify(listaMensagensExibidas));
+
+            await promiseItensExibir;
+            await promiseItensExibidos;
+        } catch (error) {
+            console.log(error);
+            Alert.alert('Erro ao salvar mensagens no dispositivo: ' + error);
+        }
+    }
+
+    async lerMensagensExibir () {
+        try {                   
+            let promiseItensExibir = await AsyncStorage.getItem('msgExibir');
+            
+            if(promiseItensExibir) {
+                return JSON.parse(promiseItensExibir);
+            }
+            return null;
+        } catch (error) {
+            console.log(error);
+            Alert.alert('Erro ao ler mensagens a exibir: ' + error);
+        }
+    }
+
+    async lerMensagensExibidas () {
+        try {
+            let promiseItensExibidas = await AsyncStorage.getItem('msgExibidas');
+
+            return JSON.parse(promiseItensExibidas);
+        } catch (error) {
+            console.log(error);
+            Alert.alert('Erro ao ler mensagens a exibir: ' + error);
+        }
+    }
+
+    abrirConfiguracoes() {
+        const { navigation } = this.props;
+
+        navigation.navigate('ConfiguracaoComponente');
     }
 }
 
@@ -136,7 +177,7 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         alignItems: 'stretch',
-        backgroundColor: '#f5a5a5',
+        backgroundColor: '#5FC594',
         width: '100%'
     },
     areaBotao: {
